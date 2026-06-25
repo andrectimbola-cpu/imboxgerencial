@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
+<!-- saved from url=(0042)file:///C:/Users/Free/Downloads/index.html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inbox — Gerencial</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link href="./index_files/css2" rel="stylesheet">
 <style>
   :root{
     --preto:#0d0d0d; --grafite:#161616; --carvao:#202020; --carvao2:#282828;
@@ -41,6 +41,18 @@
   .sb-search input{width:100%;background:var(--preto);border:1px solid var(--borda);border-radius:20px;padding:9px 14px;color:var(--branco);font-size:13px;font-family:'Inter'}
   .sb-search input:focus{outline:none;border-color:var(--ouro)}
   .conv-list{flex:1;overflow-y:auto}
+  .abas{display:flex;gap:4px;padding:8px 10px;border-bottom:1px solid var(--borda);background:var(--grafite)}
+  .aba{flex:1;background:var(--carvao);color:var(--cinza-claro);border:1px solid var(--borda);border-radius:8px;padding:7px 6px;font-size:11px;font-weight:600;cursor:pointer;transition:.12s;line-height:1.2}
+  .aba:hover{border-color:var(--ouro-escuro)}
+  .aba.ativa{background:var(--ouro);color:var(--preto);border-color:var(--ouro)}
+  .sel-bar{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--carvao2);border-bottom:1px solid var(--borda);font-size:12px;color:var(--cinza-claro)}
+  .sel-todos{display:flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap}
+  .sel-todos input{width:auto}
+  #selCount{flex:1;color:var(--ouro);font-weight:600}
+  .btn-mini{background:var(--ouro);color:var(--preto);border:none;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer}
+  .btn-mini:hover{background:var(--ouro-claro)}
+  .conv-check{width:18px;height:18px;flex-shrink:0;cursor:pointer;accent-color:var(--ouro)}
+  .conv-badge-neg{font-size:9px;color:var(--ouro);border:1px solid var(--ouro-escuro);border-radius:4px;padding:1px 5px;margin-left:6px}
   .conv{display:flex;gap:11px;padding:12px 14px;cursor:pointer;border-bottom:1px solid #1e1e1e;transition:.12s;align-items:center}
   .conv:hover{background:var(--carvao)}
   .conv.active{background:var(--carvao2);border-left:3px solid var(--ouro)}
@@ -130,9 +142,9 @@
 <div class="login-bg" id="loginBg">
   <div class="login-box">
     <div class="logo-mark">G</div>
-    <h2 style="font-family:'Anton';font-weight:400;margin-bottom:6px">INBOX</h2>
+    <h2 style="font-family:&#39;Anton&#39;;font-weight:400;margin-bottom:6px">INBOX</h2>
     <p class="muted" style="margin-bottom:18px">Acesso restrito</p>
-    <input type="password" id="senhaInput" placeholder="Senha" onkeydown="if(event.key==='Enter')entrar()">
+    <input type="password" id="senhaInput" placeholder="Senha" onkeydown="if(event.key===&#39;Enter&#39;)entrar()">
     <button class="btn-ouro" style="width:100%;margin-top:14px" onclick="entrar()">Entrar</button>
   </div>
 </div>
@@ -148,8 +160,42 @@
       </div>
     </div>
     <div class="sb-search"><input id="busca" placeholder="Buscar conversa..." oninput="renderConversas()"></div>
+    <div class="abas" id="abas">
+      <button class="aba ativa" data-aba="todas" onclick="trocarAba(&#39;todas&#39;)">Todas</button>
+      <button class="aba" data-aba="aberto" onclick="trocarAba(&#39;aberto&#39;)">Negociações em aberto</button>
+    </div>
+    <div class="sel-bar" id="selBar" style="display:none">
+      <label class="sel-todos"><input type="checkbox" id="selTodos" onchange="toggleSelTodos()"> Selecionar todos</label>
+      <span id="selCount">0 selecionados</span>
+      <button class="btn-mini" onclick="abrirDisparoMassa()">Disparar</button>
+    </div>
     <div class="conv-list" id="convList"></div>
   </div>
+
+  <!-- MODAL DISPARO EM MASSA -->
+  <div class="modal-bg" id="modalMassa">
+    <div class="modal">
+      <div class="modal-head"><h2>Disparo em massa</h2><button class="close" onclick="fechar(&#39;modalMassa&#39;)">×</button></div>
+      <div class="modal-body">
+        <p class="muted" id="massaInfo" style="margin-bottom:12px"></p>
+        <label>Mensagem</label>
+        <textarea id="massa_msg" placeholder="Use {nome} para personalizar com o nome do contato..."></textarea>
+        <label>Anexar mídia (opcional)</label>
+        <input type="file" id="massa_file" accept="image/*,video/*,application/pdf" onchange="prepararMidiaMassa()">
+        <p class="muted" id="massa_fileInfo" style="margin-top:6px"></p>
+        <label style="display:flex;align-items:center;gap:8px;text-transform:none;margin-top:14px">
+          <input type="checkbox" id="massa_agendar" style="width:auto" onchange="toggleAgendarMassa()"> Agendar para depois
+        </label>
+        <div class="row" id="massa_dataHora" style="display:none;margin-top:8px">
+          <div><label>Data</label><input type="date" id="massa_data"></div>
+          <div><label>Hora</label><input type="time" id="massa_hora"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="fechar(&#39;modalMassa&#39;)">Cancelar</button>
+        <button class="btn-ouro" id="btnDisparar" onclick="executarDisparoMassa()">Enviar agora</button>
+      </div>
+    </div>
 
   <!-- CHAT -->
   <div class="chat" id="chat">
@@ -166,14 +212,15 @@
           <small id="chatTel"></small>
         </div>
         <div class="chat-head-actions">
+          <button class="icon-only" id="btnNegociacao" title="Marcar como negociação em aberto" onclick="toggleNegociacao()">💼</button>
           <button class="icon-only" title="Agendar mensagem" onclick="abrirAgendar()">🕑</button>
         </div>
       </div>
       <div class="chat-body" id="chatBody"></div>
       <div class="composer">
         <input type="file" id="fileInput" style="display:none" accept="image/*,video/*,application/pdf" onchange="enviarMidia()">
-        <button class="attach-btn" onclick="document.getElementById('fileInput').click()">📎</button>
-        <textarea id="msgInput" rows="1" placeholder="Digite uma mensagem..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarTexto()}" oninput="autoGrow(this)"></textarea>
+        <button class="attach-btn" onclick="document.getElementById(&#39;fileInput&#39;).click()">📎</button>
+        <textarea id="msgInput" rows="1" placeholder="Digite uma mensagem..." onkeydown="if(event.key===&#39;Enter&#39;&amp;&amp;!event.shiftKey){event.preventDefault();enviarTexto()}" oninput="autoGrow(this)"></textarea>
         <button class="send-btn" id="sendBtn" onclick="enviarTexto()">➤</button>
       </div>
     </div>
@@ -183,14 +230,14 @@
 <!-- MODAL NOVA CONVERSA -->
 <div class="modal-bg" id="modalNova">
   <div class="modal">
-    <div class="modal-head"><h2>Nova conversa</h2><button class="close" onclick="fechar('modalNova')">×</button></div>
+    <div class="modal-head"><h2>Nova conversa</h2><button class="close" onclick="fechar(&#39;modalNova&#39;)">×</button></div>
     <div class="modal-body">
       <label>Nome</label><input id="nc_nome" placeholder="Nome do contato">
       <label>WhatsApp (com DDD)</label><input id="nc_tel" placeholder="46 99999-9999">
       <label>Primeira mensagem</label><textarea id="nc_msg" placeholder="Mensagem inicial..."></textarea>
     </div>
     <div class="modal-footer">
-      <button class="btn-ghost" onclick="fechar('modalNova')">Cancelar</button>
+      <button class="btn-ghost" onclick="fechar(&#39;modalNova&#39;)">Cancelar</button>
       <button class="btn-ouro" onclick="iniciarConversa()">Enviar</button>
     </div>
   </div>
@@ -199,7 +246,7 @@
 <!-- MODAL AGENDAR -->
 <div class="modal-bg" id="modalAgendar">
   <div class="modal">
-    <div class="modal-head"><h2>Agendar mensagem</h2><button class="close" onclick="fechar('modalAgendar')">×</button></div>
+    <div class="modal-head"><h2>Agendar mensagem</h2><button class="close" onclick="fechar(&#39;modalAgendar&#39;)">×</button></div>
     <div class="modal-body">
       <p class="muted" id="agendarPara" style="margin-bottom:12px"></p>
       <label>Mensagem</label><textarea id="ag_msg" placeholder="Texto da mensagem (opcional se anexar mídia)..."></textarea>
@@ -212,7 +259,7 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-ghost" onclick="fechar('modalAgendar')">Cancelar</button>
+      <button class="btn-ghost" onclick="fechar(&#39;modalAgendar&#39;)">Cancelar</button>
       <button class="btn-ouro" onclick="salvarAgendamento()">Agendar</button>
     </div>
   </div>
@@ -221,9 +268,9 @@
 <!-- MODAL LISTA AGENDAMENTOS -->
 <div class="modal-bg" id="modalAgList">
   <div class="modal">
-    <div class="modal-head"><h2>Mensagens agendadas</h2><button class="close" onclick="fechar('modalAgList')">×</button></div>
+    <div class="modal-head"><h2>Mensagens agendadas</h2><button class="close" onclick="fechar(&#39;modalAgList&#39;)">×</button></div>
     <div class="modal-body" id="agListBody"></div>
-    <div class="modal-footer"><button class="btn-ghost" onclick="fechar('modalAgList')">Fechar</button></div>
+    <div class="modal-footer"><button class="btn-ghost" onclick="fechar(&#39;modalAgList&#39;)">Fechar</button></div>
   </div>
 </div>
 
@@ -242,6 +289,9 @@ const SENHA = 'inbox2026';
 let conversas = [];
 let conversaAtual = null;
 let pollInterval = null;
+let abaAtual = 'todas';
+let selecionados = new Set();
+let modoSelecao = false;
 
 function entrar(){
   if(document.getElementById('senhaInput').value === SENHA){
@@ -300,14 +350,16 @@ function horaCurta(ts){const d=new Date(ts);const h=new Date();return d.toDateSt
 function renderConversas(){
   const busca=(document.getElementById('busca').value||'').toLowerCase();
   const list=document.getElementById('convList');
-  const filt=conversas.filter(c=>(c.nome||c.telefone).toLowerCase().includes(busca)||c.telefone.includes(busca));
-  if(!filt.length){list.innerHTML='<div class="empty-list">Nenhuma conversa ainda</div>';return}
+  let filt=conversas.filter(c=>(c.nome||c.telefone).toLowerCase().includes(busca)||c.telefone.includes(busca));
+  if(abaAtual==='aberto') filt=filt.filter(c=>c.etapa==='aberto');
+  if(!filt.length){list.innerHTML='<div class="empty-list">'+(abaAtual==='aberto'?'Nenhuma negociação em aberto':'Nenhuma conversa ainda')+'</div>';return}
   list.innerHTML=filt.map(c=>`
-    <div class="conv ${conversaAtual&&conversaAtual.id===c.id?'active':''}" onclick="abrirConversa('${c.id}')">
+    <div class="conv ${conversaAtual&&conversaAtual.id===c.id?'active':''}" ${modoSelecao?`onclick="toggleSelecao('${c.id}',event)"`:`onclick="abrirConversa('${c.id}')"`}>
+      ${modoSelecao?`<input type="checkbox" class="conv-check" ${selecionados.has(c.id)?'checked':''} onclick="toggleSelecao('${c.id}',event)">`:''}
       <div class="avatar">${c.foto?`<img src="${c.foto}">`:iniciais(c.nome||c.telefone)}</div>
       <div class="conv-info">
         <div class="conv-top">
-          <span class="conv-nome">${c.nome||c.telefone}</span>
+          <span class="conv-nome">${c.nome||c.telefone}${c.etapa==='aberto'&&abaAtual==='todas'?'<span class="conv-badge-neg">negociação</span>':''}</span>
           <span class="conv-hora">${horaCurta(c.ultima_em)}</span>
         </div>
         <div class="conv-top">
@@ -318,6 +370,56 @@ function renderConversas(){
     </div>`).join('');
 }
 
+// ---------- Abas e seleção ----------
+function trocarAba(aba){
+  abaAtual=aba;
+  document.querySelectorAll('.aba').forEach(b=>b.classList.toggle('ativa',b.dataset.aba===aba));
+  // modo seleção só faz sentido na aba de negociações
+  modoSelecao = (aba==='aberto');
+  selecionados.clear();
+  document.getElementById('selBar').style.display = modoSelecao ? 'flex' : 'none';
+  document.getElementById('selTodos').checked=false;
+  atualizarSelCount();
+  renderConversas();
+}
+function toggleSelecao(id,event){
+  if(event) event.stopPropagation();
+  if(selecionados.has(id)) selecionados.delete(id); else selecionados.add(id);
+  atualizarSelCount();
+  renderConversas();
+}
+function toggleSelTodos(){
+  const marcado=document.getElementById('selTodos').checked;
+  const busca=(document.getElementById('busca').value||'').toLowerCase();
+  const visiveis=conversas.filter(c=>c.etapa==='aberto'&&((c.nome||c.telefone).toLowerCase().includes(busca)||c.telefone.includes(busca)));
+  selecionados.clear();
+  if(marcado) visiveis.forEach(c=>selecionados.add(c.id));
+  atualizarSelCount();
+  renderConversas();
+}
+function atualizarSelCount(){
+  document.getElementById('selCount').textContent=selecionados.size+' selecionado'+(selecionados.size===1?'':'s');
+}
+
+// ---------- Marcar/desmarcar negociação ----------
+async function toggleNegociacao(){
+  if(!conversaAtual)return;
+  const nova = conversaAtual.etapa==='aberto' ? 'nenhuma' : 'aberto';
+  await sbPatch('conversas',conversaAtual.id,{etapa:nova});
+  conversaAtual.etapa=nova;
+  atualizarBotaoNegociacao();
+  await carregarConversas();
+  toast(nova==='aberto'?'Movido para Negociações em aberto':'Removido das negociações');
+}
+function atualizarBotaoNegociacao(){
+  const b=document.getElementById('btnNegociacao');
+  if(!b||!conversaAtual)return;
+  const ativo=conversaAtual.etapa==='aberto';
+  b.style.background=ativo?'var(--ouro)':'';
+  b.style.color=ativo?'var(--preto)':'';
+  b.title=ativo?'Remover de negociações em aberto':'Marcar como negociação em aberto';
+}
+
 async function abrirConversa(id){
   conversaAtual = conversas.find(c=>c.id===id);
   if(!conversaAtual)return;
@@ -326,6 +428,7 @@ async function abrirConversa(id){
   document.getElementById('chatNome').textContent=conversaAtual.nome||conversaAtual.telefone;
   document.getElementById('chatTel').textContent=conversaAtual.telefone;
   document.getElementById('chatAvatar').innerHTML=conversaAtual.foto?`<img src="${conversaAtual.foto}">`:iniciais(conversaAtual.nome||conversaAtual.telefone);
+  atualizarBotaoNegociacao();
   // mobile: esconde sidebar
   document.getElementById('sidebar').classList.add('hidden-mobile');
   document.getElementById('chat').classList.remove('hidden-mobile');
@@ -485,11 +588,83 @@ async function abrirAgendamentos(){
 }
 async function cancelarAgendamento(id){await sbDelete('agendamentos',id);abrirAgendamentos();toast('Agendamento cancelado')}
 
+// ---------- Disparo em massa ----------
+let midiaMassa=null;
+function abrirDisparoMassa(){
+  if(selecionados.size===0){toast('Selecione ao menos um contato');return}
+  document.getElementById('massaInfo').textContent=`Mensagem para ${selecionados.size} contato${selecionados.size===1?'':'s'} selecionado${selecionados.size===1?'':'s'}.`;
+  document.getElementById('massa_msg').value='';
+  document.getElementById('massa_file').value='';
+  document.getElementById('massa_fileInfo').textContent='';
+  document.getElementById('massa_agendar').checked=false;
+  document.getElementById('massa_dataHora').style.display='none';
+  document.getElementById('btnDisparar').textContent='Enviar agora';
+  midiaMassa=null;
+  show('modalMassa');
+}
+function toggleAgendarMassa(){
+  const ag=document.getElementById('massa_agendar').checked;
+  document.getElementById('massa_dataHora').style.display=ag?'flex':'none';
+  document.getElementById('btnDisparar').textContent=ag?'Agendar':'Enviar agora';
+}
+function prepararMidiaMassa(){
+  const file=document.getElementById('massa_file').files[0];
+  const info=document.getElementById('massa_fileInfo');
+  if(!file){midiaMassa=null;info.textContent='';return}
+  if(file.size>4*1024*1024){info.textContent=`⚠ Máximo 4MB. Esse tem ${(file.size/1024/1024).toFixed(1)}MB.`;midiaMassa=null;document.getElementById('massa_file').value='';return}
+  const tipo=file.type.startsWith('image')?'imagem':file.type.startsWith('video')?'video':'documento';
+  const reader=new FileReader();
+  reader.onload=()=>{midiaMassa={base64:reader.result,tipo,nome:file.name};info.textContent=`✓ ${file.name} anexado`;};
+  reader.readAsDataURL(file);
+}
+async function executarDisparoMassa(){
+  const msg=document.getElementById('massa_msg').value.trim();
+  const agendar=document.getElementById('massa_agendar').checked;
+  if(!msg && !midiaMassa){toast('Escreva uma mensagem ou anexe mídia');return}
+  const alvos=conversas.filter(c=>selecionados.has(c.id));
+  if(!alvos.length){toast('Nenhum contato selecionado');return}
+
+  if(agendar){
+    const data=document.getElementById('massa_data').value;
+    const hora=document.getElementById('massa_hora').value;
+    if(!data||!hora){toast('Defina data e hora');return}
+    const enviar_em=new Date(`${data}T${hora}`).toISOString();
+    for(const c of alvos){
+      const pessoal=msg.replace(/{nome}/g,(c.nome||'').split(' ')[0]);
+      await sbPost('agendamentos',{telefone:c.telefone,nome:c.nome,conteudo:pessoal,tipo:midiaMassa?midiaMassa.tipo:'texto',midia_url:midiaMassa?midiaMassa.base64:null,enviar_em});
+    }
+    fechar('modalMassa');toast(`${alvos.length} mensagens agendadas`);
+    selecionados.clear();atualizarSelCount();renderConversas();
+    return;
+  }
+
+  // envio imediato
+  fechar('modalMassa');
+  toast(`Enviando para ${alvos.length}...`);
+  let ok=0,erro=0;
+  for(const c of alvos){
+    const pessoal=msg.replace(/{nome}/g,(c.nome||'').split(' ')[0]);
+    try{
+      if(midiaMassa) await zapiMidia(c.telefone,midiaMassa.base64,midiaMassa.tipo,pessoal);
+      else await zapiTexto(c.telefone,pessoal);
+      const preview=midiaMassa?('📎 '+midiaMassa.tipo):pessoal;
+      await sbPost('mensagens',{conversa_id:c.id,telefone:c.telefone,direcao:'enviada',tipo:midiaMassa?midiaMassa.tipo:'texto',conteudo:pessoal,midia_url:midiaMassa?midiaMassa.base64:null});
+      await sbPatch('conversas',c.id,{ultima_mensagem:preview,ultima_em:new Date().toISOString()});
+      ok++;
+    }catch(e){erro++;}
+    await new Promise(r=>setTimeout(r,1500)); // espaça envios pra reduzir risco de bloqueio
+  }
+  selecionados.clear();atualizarSelCount();
+  await carregarConversas();
+  toast(`Enviado: ${ok} ok${erro?`, ${erro} falha(s)`:''}`);
+}
+
 // ---------- utils ----------
 function autoGrow(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px'}
 function show(id){document.getElementById(id).classList.add('show')}
 function fechar(id){document.getElementById(id).classList.remove('show')}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(window._t);window._t=setTimeout(()=>t.classList.remove('show'),3000)}
 </script>
-</body>
-</html>
+
+
+</div></body></html>
